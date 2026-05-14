@@ -98,15 +98,17 @@ a { color: inherit; text-decoration: none; }
 /* ── Layout ── */
 .app-shell {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  /* minmax(0,1fr) 防止主列被宽内容撑出视口（仅 min-width:0 在部分浏览器仍不够稳） */
+  grid-template-columns: 280px minmax(0, 1fr);
   min-height: 100vh;
 }
 
 .content {
   padding: var(--space-8);
   overflow-y: auto;
-  /* 只在垂直方向滚动，避免与表格横向滚动冲突 */
+  /* 只在垂直方向滚动；min-width:0 让 grid 的 1fr 列可被内容约束宽度，否则列会随宽表格撑开，内部无法出现横向滚动 */
   overflow-x: hidden;
+  min-width: 0;
 }
 
 /* ── Sidebar ── */
@@ -1005,49 +1007,17 @@ a { color: inherit; text-decoration: none; }
 
 /* ── Table Scroll Container (通用表格滚动容器) ── */
 .table-scroll-container {
-  overflow-x: auto !important;
-  overflow-y: visible !important;
-  /* 优化滚动条样式 */
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  /* 为横向滚动条预留槽位，避免被误认为「没有滚动条」 */
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: rgba(45, 106, 79, 0.4) rgba(42, 42, 42, 0.06);
 }
 
-/* 优化表格滚动条样式 */
-.table-scroll-container::-webkit-scrollbar {
-  height: 8px;
-}
-
-.table-scroll-container::-webkit-scrollbar-track {
-  background: rgba(42, 42, 42, 0.06);
-  border-radius: 4px;
-}
-
-.table-scroll-container::-webkit-scrollbar-thumb {
-  background: rgba(45, 106, 79, 0.4);
-  border-radius: 4px;
-}
-
-.table-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(45, 106, 79, 0.6);
-}
-
-/* 关键：让 Element Plus 表格使用外层容器的滚动 */
-.table-scroll-container :deep(.el-table) {
-  display: block;
-}
-
-.table-scroll-container :deep(.el-table__body-wrapper),
-.table-scroll-container :deep(.el-table__header-wrapper) {
-  overflow: visible !important;
-}
-
-/* 隐藏 Element Plus 表格自带的滚动条 */
-.table-scroll-container :deep(.el-table__body-wrapper::-webkit-scrollbar),
-.table-scroll-container :deep(.el-table__header-wrapper::-webkit-scrollbar) {
-  display: none !important;
-}
-
-/* 优化表格滚动条样式 */
 .table-scroll-container::-webkit-scrollbar {
   height: 8px;
 }
@@ -1072,14 +1042,13 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* 确保卡片内容区域不产生滚动条（已经在 .el-card__body 中统一设置） */
-.el-card.table-card :deep(.el-card__body) {
-  /* 继承全局的 .el-card__body 样式 */
+.el-card.table-card .el-card__body {
   padding: var(--space-6) !important;
 }
 
 /* ── Responsive ── */
 @media (max-width: 960px) {
-  .app-shell { grid-template-columns: 1fr; }
+  .app-shell { grid-template-columns: minmax(0, 1fr); }
   .sidebar { display: none; }
   .content { padding: 18px; }
 }

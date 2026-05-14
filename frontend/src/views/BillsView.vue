@@ -78,8 +78,14 @@
     </el-card>
 
     <el-card shadow='never' class='table-card'>
-      <div class='table-scroll-container'>
-        <el-table :data='bills' stripe empty-text='暂无数据'>
+      <div class='table-scroll-container bills-table-scroll'>
+        <el-table
+          :data='bills'
+          stripe
+          empty-text='暂无数据'
+          flexible
+          :fit='false'
+        >
           <el-table-column prop='id' label='ID' width='110' />
           <el-table-column label='来源' width='110'>
             <template #default='{ row }'>
@@ -427,7 +433,7 @@ onMounted(async () => {
 .bills-page {
   display: grid;
   gap: var(--space-4);
-  /* 确保页面容器本身不会产生横向滚动 */
+  min-width: 0;
   overflow-x: hidden;
 }
 
@@ -520,7 +526,12 @@ onMounted(async () => {
 }
 
 /* ── Table Card / Scroll ── */
-/* 表格滚动样式已移至全局 style.css 中的 .table-scroll-container */
+/* 列宽合计约 1720px，略增以含边框；强制表比可视区宽时由外层 .table-scroll-container 横向滚动 */
+.bills-table-scroll :deep(.el-table) {
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+}
 
 /* ── Source Tags ── */
 .source-tag {
