@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用指南 - 微信账单分析系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-elevated: #ffffff;
+            --bg-subtle: #f1f5f9;
+            --border-100: #e2e8f0;
+            --border-200: #cbd5e1;
+            --text-400: #94a3b8;
+            --text-500: #64748b;
+            --text-700: #334155;
+            --text-900: #0f172a;
+            --brand-500: #3b82f6;
+            --brand-600: #2563eb;
+            --success-500: #22c55e;
+            --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-700);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .guide-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .guide-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .guide-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--brand-600);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .guide-title {
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--text-900);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .guide-subtitle {
+            font-size: 18px;
+            color: var(--text-500);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .steps-container {
+            position: relative;
+        }
+
+        .steps-container::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--brand-500), var(--success-500));
+            transform: translateX(-50%);
+        }
+
+        .step-row {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .step-row:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .step-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-brand);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-number.success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+        }
+
+        .step-content {
+            flex: 1;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-100);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .step-content:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .step-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .step-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-900);
+            margin-bottom: 12px;
+        }
+
+        .step-description {
+            font-size: 15px;
+            color: var(--text-500);
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .step-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .step-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-subtle);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-700);
+            font-weight: 500;
+        }
+
+        .step-tag::before {
+            content: '→';
+            color: var(--brand-500);
+        }
+
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--gradient-brand);
+            color: white;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        .action-button.secondary {
+            background: var(--bg-subtle);
+            color: var(--text-700);
+            border: 1px solid var(--border-200);
+        }
+
+        .action-button.secondary:hover {
+            background: var(--border-100);
+        }
+
+        .tips-section {
+            margin-top: 80px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+        }
+
+        .tips-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-900);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .tip-card {
+            background: var(--bg-elevated);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-100);
+        }
+
+        .tip-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .tip-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-900);
+            margin-bottom: 8px;
+        }
+
+        .tip-description {
+            font-size: 14px;
+            color: var(--text-500);
+            line-height: 1.6;
+        }
+
+        .cta-section {
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-900);
+            margin-bottom: 16px;
+        }
+
+        .cta-description {
+            font-size: 16px;
+            color: var(--text-500);
+            margin-bottom: 32px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .guide-title {
+                font-size: 32px;
+            }
+
+            .steps-container::before {
+                left: 40px;
+            }
+
+            .step-row {
+                flex-direction: column !important;
+                gap: 20px;
+                padding-left: 80px;
+            }
+
+            .step-number {
+                position: absolute;
+                left: 0;
+            }
+
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="guide-container">
+        <!-- 头部 -->
+        <div class="guide-header">
+            <div class="guide-badge">
+                <span>🚀</span>
+                <span>新手引导</span>
+            </div>
+            <h1 class="guide-title">欢迎使用账单分析系统</h1>
+            <p class="guide-subtitle">按照以下步骤，快速上手账单导入、智能分类、数据分析全流程</p>
+        </div>
+
+        <!-- 步骤流程 -->
+        <div class="steps-container">
+            <!-- 步骤1: 账单导入 -->
+            <div class="step-row">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-icon">📥</div>
+                    <h2 class="step-title">导入账单数据</h2>
+                    <p class="step-description">
+                        从微信或支付宝导出账单文件，上传到系统中。系统会自动解析文件内容，识别交易记录。
+                    </p>
+                    <div class="step-actions">
+                        <span class="step-tag">支持微信 Excel 文件</span>
+                        <span class="step-tag">支持支付宝 CSV 文件</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤2: 配置分类 -->
+            <div class="step-row">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-icon">⚙️</div>
+                    <h2 class="step-title">配置分类规则</h2>
+                    <p class="step-description">
+                        设置消费分类（如餐饮、购物、交通等），配置关键字匹配规则和AI分类参数，提高自动分类准确率。
+                    </p>
+                    <div class="step-actions">
+                        <span class="step-tag">分类管理</span>
+                        <span class="step-tag">关键字规则</span>
+                        <span class="step-tag">AI配置</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤3: 自动分类 -->
+            <div class="step-row">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-icon">🤖</div>
+                    <h2 class="step-title">执行自动分类</h2>
+                    <p class="step-description">
+                        系统根据配置的规则和AI模型，自动对导入的账单进行智能分类，大幅减少手动操作。
+                    </p>
+                    <div class="step-actions">
+                        <span class="step-tag">一键批量分类</span>
+                        <span class="step-tag">智能匹配算法</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤4: 复核与处理 -->
+            <div class="step-row">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-icon">✅</div>
+                    <h2 class="step-title">复核分类结果</h2>
+                    <p class="step-description">
+                        查看AI分类结果，对不确定的账单进行人工复核。处理分类异常的账单，确保数据准确性。
+                    </p>
+                    <div class="step-actions">
+                        <span class="step-tag">待复核列表</span>
+                        <span class="step-tag">异常处理</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤5: 数据分析 -->
+            <div class="step-row">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <div class="step-icon">📊</div>
+                    <h2 class="step-title">查看统计分析</h2>
+                    <p class="step-description">
+                        在首页查看年度、月度收支统计，分析消费趋势，了解各分类支出占比，掌握财务状况。
+                    </p>
+                    <div class="step-actions">
+                        <span class="step-tag">收支趋势图</span>
+                        <span class="step-tag">分类占比</span>
+                        <span class="step-tag">Top10排行</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤6: 查询明细 -->
+            <div class="step-row">
+                <div class="step-number success">6</div>
+                <div class="step-content">
+                    <div class="step-icon">💳</div>
+                    <h2 class="step-title">查询账单明细</h2>
+                    <p class="step-description">
+                        按时间、分类、收支类型等条件筛选查询具体账单记录，支持导出数据进行进一步分析。
+                    </p>
+                    <div class="step-actions">
+                        <span class="step-tag">多维度筛选</span>
+                        <span class="step-tag">数据导出</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用技巧 -->
+        <div class="tips-section">
+            <h2 class="tips-title">
+                <span>💡</span>
+                <span>使用技巧</span>
+            </h2>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-icon">🎯</div>
+                    <h3 class="tip-title">善用关键字规则</h3>
+                    <p class="tip-description">配置常见商家名称关键字，可显著提高自动分类准确率，减少人工复核工作量。</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🔄</div>
+                    <h3 class="tip-title">定期同步数据</h3>
+                    <p class="tip-description">建议每月定期导入新账单并执行分类，保持数据及时更新，便于准确跟踪消费趋势。</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📈</div>
+                    <h3 class="tip-title">关注大额支出</h3>
+                    <p class="tip-description">利用Top10排行功能，定期查看大额支出记录，优化消费结构，控制不必要的开支。</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📁</div>
+                    <h3 class="tip-title">数据备份</h3>
+                    <p class="tip-description">定期导出账单数据进行本地备份，确保数据安全，便于长期财务规划分析。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 行动号召 -->
+        <div class="cta-section">
+            <h2 class="cta-title">准备好了吗？</h2>
+            <p class="cta-description">点击下方按钮，开始您的账单分析之旅</p>
+            <div class="cta-buttons">
+                <a href="#" class="action-button">
+                    <span>📥</span>
+                    <span>开始导入账单</span>
+                </a>
+                <a href="#" class="action-button secondary">
+                    <span>📊</span>
+                    <span>查看使用教程</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
