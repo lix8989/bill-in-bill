@@ -552,16 +552,9 @@ a { color: inherit; text-decoration: none; }
 /* ── Table ── */
 .el-table {
   border-radius: var(--radius-lg) !important;
-  overflow: visible !important;
 }
 
-.el-table__body-wrapper {
-  overflow: visible !important;
-}
-
-.el-table__header-wrapper {
-  overflow: visible !important;
-}
+/* 勿覆盖表头/表体 wrapper 的 overflow：表格依赖默认 overflow 做列宽与横向滚动同步 */
 
 .el-table th.el-table__cell {
   background: rgba(45, 106, 79, 0.06) !important;

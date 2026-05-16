@@ -4,6 +4,7 @@ const routes = [
   { path: '/', redirect: '/dashboard' },
   { path: '/dashboard', component: () => import('../views/DashboardView.vue') },
   { path: '/bills', component: () => import('../views/BillsView.vue') },
+  { path: '/bills-prototype', redirect: '/bills' },
   { path: '/categories', component: () => import('../views/CategoriesView.vue') },
   { path: '/imports', component: () => import('../views/ImportsView.vue') },
   { path: '/classifier-sync-logs', component: () => import('../views/ClassifierSyncLogsView.vue') },
