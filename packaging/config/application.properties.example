@@ -1,0 +1,8 @@
+# Copy to .\config\application.properties beside start.bat if you want to override defaults.
+#
+# Examples:
+#
+# server.port=8081
+#
+# Absolute DB path example (SQLite only):
+# spring.datasource.url=jdbc:sqlite:C:/Users/you/AppData/Local/BillInBill/data/wechat-bill.db
