@@ -125,14 +125,14 @@
 
 ### 主方案：**Fat JAR + 便携运行时 + ZIP**
 
-- **目标产物**：单个 `BillInBill-windows-amd64-{版本}.zip`（名称可自定），解压后双击 `start.bat` 启动。
+- **目标产物**：`bill-in-bill-{版本}-windows-amd64.zip`；解压后顶层为 **`BillInBill`** 文件夹（英文名，避免解压工具路径编码问题），**双击 `run.bat` 即可启动**（`start.bat` 为等价入口）。
 - **包内典型组成**：
-  - `README.txt`：访问地址、`8080` 端口说明、备份 `data\wechat-bill.db`、不要复制到多台机同时写一个库等；
-  - `start.bat`：`cd /d %~dp0`，调用自带的 `jdk-21\bin\java.exe`（或 `%JAVA_HOME%`），执行 `java -jar lib\bill-in-bill-backend-*.jar`（参数可按需追加 `--spring.config.additional-location=...\config\`）；
-  - `lib\*.jar`：Spring Boot Fat JAR（建议已内嵌前端 `dist`，见 §4）；
-  - `jdk-21\`（或 `jre\`）：Windows x64 **Java 21** 解压版（遵守所选发行版的**再分发条款**）；若压缩包体积敏感，可在 README 要求用户本机安装 JDK 21 并仅分发 `jar + bat`，但「解压即用」体验会变差；
-  - `data\`：空目录或带 `.gitkeep`；首次启动由 SQLite 写库；
-  - 可选 `config\application.properties`：覆盖端口、`spring.datasource.url` 等，无需改 jar。
+  - `README.txt`：解压位置建议、浏览器地址、SQLite 备份说明；
+  - **`run.bat`**、**`start.bat`**：`run.bat` 内 `cd /d %~dp0` 后以 **当前目录** 启动 Spring Boot（`start.bat` 仅转调 `run.bat`），`data\`、`config\` 均相对此目录而无需脚本里再配路径；
+  - `jdk-21\bin\java.exe`（可选，打包时使用 `-JdkPath`）；未捆绑时依赖本机 **Java 21**；
+  - `lib\bill-in-bill-backend.jar`：Fat JAR（已内嵌构建时的前端 `dist/`）；
+  - **`data\wechat-bill.db`**：**随包提供**。若打包时仓库根存在 `data/wechat-bill.db` 则原样拷贝；否则由构建脚本调用 **`PortableSeedDb`** 按 **`db/schema.sql`** 生成空白库；
+  - `config/`：预留空目录；用户若需覆写端口等，只需放入 **`application.properties`**（Spring Boot 默认会检索当前工作目录下的 `config/`，无需环境变量）。
 - **构建流水线**：CI/本地脚本顺序为：`npm ci && npm run build` → 将 `frontend/dist` 打入后端静态资源并完成 `mvn package` → 组 staging 目录并按上表拷贝 → `Compress-Archive` 或 `7z`/zip 打成最终 zip。
 - **优点**：不打安装器、不改注册表；升级可「整包替换」或保留 `data\` + 替换 `lib\`/`jdk\`。
 - **注意**：杀毒软件可能对解压型 `jdk` 误判；可考虑代码签名或对 zip 说明「首次解压需时间较长」。
@@ -152,18 +152,20 @@
 
 **产出位置**：仓库根目录下 **`dist-portable/`**（已写入根 `.gitignore`）。成功后生成形如 **`bill-in-bill-{pom-version}-windows-amd64.zip`** 的文件；解压后顶层为 **`BillInBill`** 文件夹，内含：
 
-- `README.txt`（内容由 `packaging/templates/README-PORTABLE.txt` 复制）
-- `start.bat`
-- `lib/bill-in-bill-backend.jar`（Fat JAR，已内嵌构建时的前端静态资源）
-- `data/`、`config/application.properties.example`（可选拷贝为 `config/application.properties` 覆盖配置）
-- 可选 `jdk-21/`（仅在打包时传入 `-JdkPath` 时附带）
+- `README.txt`（`packaging/templates/README-PORTABLE.txt`）
+- **`run.bat`**、`start.bat`
+- `lib/bill-in-bill-backend.jar`
+- **`data/wechat-bill.db`**（仓库 `data/wechat-bill.db` 优先拷贝，否则由 **`com.lex.wechatbill.tools.PortableSeedDb`** 从 `schema.sql` 即时生成）
+- `config/`（含占位 `.keep`；可选由用户自建 `application.properties`）
 
 **流程步骤**
 
 1. `frontend/`：`npm ci`（可加 `-SkipNpmCi` 跳过）→ `npm run build`
-2. `backend/`：`mvn -DskipTests package`。`pom.xml` 中 **`maven-resources-plugin`** 在 `prepare-package` 将 **`../frontend/dist`** 拷贝到 **`target/classes/static`**，Spring Boot Repackage 打入 Fat JAR。
-3. 脚本选取 `backend/target/` 下的 Spring Boot Jar，复制并重命名为 **`lib/bill-in-bill-backend.jar`**
-4. 组装上文目录，`Compress-Archive` 写入 `dist-portable/`，默认删除中间目录 `_staging`（可用 `-KeepStaging` 保留排查）
+2. `backend/`：`mvn -DskipTests package`。`maven-resources-plugin` 将 **`frontend/dist`** 拷入 **`target/classes/static`**。
+3. 在 **`dist-portable/_staging`** 下创建 **`BillInBill/`** 骨架；复制并重命名 **`lib/bill-in-bill-backend.jar`**、 **`run.bat`**、 **`start.bat`**、`README.txt`、`config/.keep`。
+4. **数据库**：存在 **`repo根/data/wechat-bill.db`** 则直接使用；否则在打包机上运行 **`PortableSeedDb`** 按 **`backend/.../db/schema.sql`** 生成 **`data/wechat-bill.db`**。
+5. 可选：`-JdkPath` → 拷贝 **`jdk-21/`**
+6. `Compress-Archive` → **`dist-portable/bill-in-bill-{version}-windows-amd64.zip`**，默认删掉 `_staging`。
 
 **在 Windows 上一键打包**
 
@@ -183,7 +185,7 @@ powershell -ExecutionPolicy Bypass -File .\packaging\build-portable.ps1 -KeepSta
 
 **打包机前置条件**：JDK 21、Maven、`node`/`npm` 均在 PATH。**未传 `-JdkPath`** 时 zip **不包含**运行时，解压方须在 PATH 中存在 **Java 21** 或自备 `jdk-21`（将便携 JDK 手动放进解压目录）。
 
-**脚本与模板文件**：`packaging/build-portable.ps1`（入口）、`packaging/start.bat`、`packaging/templates/README-PORTABLE.txt`、`packaging/templates/data/.keep`、`packaging/config/application.properties.example`。
+**脚本与模板文件**：`packaging/build-portable.ps1`、`packaging/run.bat`、`packaging/start.bat`、`packaging/templates/README-PORTABLE.txt`、`packaging/templates/config/.keep`、`backend/src/main/java/.../PortableSeedDb.java`（仅在打包时用 `java -cp …` + `schema.sql` 生成空库）。
 
 ---
 
@@ -192,20 +194,20 @@ powershell -ExecutionPolicy Bypass -File .\packaging\build-portable.ps1 -KeepSta
 1. **整合构建**：已实现由 **`frontend` → `vite build`、`backend` → `mvn package`** 串联，`maven-resources-plugin` 在打包前拷贝 `frontend/dist`，无需手工复制。
 2. **前端 `baseURL`**：已实现生产构建走后端同源 **`/api`**（仍可设 `VITE_API_BASE_URL` 覆盖）。
 3. **后端**：已实现静态资源 **`classpath:/static`** 与 **`SpaForwardingController`** 对应用路由页的 `forward:/index.html`。
-4. **SQLite 与目录**：ZIP 内带 `data/`；`start.bat` 使用 **`cd /d %~dp0`**。
+4. **SQLite 与目录**：zip 内含 **`BillInBill\data\wechat-bill.db`**；启动脚本 **`cd /d %~dp0`**，用户零配置即可完成启动。
 5. **组装与压缩**：执行 **`powershell -ExecutionPolicy Bypass -File .\packaging\build-portable.ps1`**（或使用 `pwsh`）；版本号取自 `backend/pom.xml` 的文件名。
-6. **验证**：在未预装 JDK 的机器上解压带 `jdk-21` 的 zip，或未带 jdk 的机器上装好 Java 21，双击 **`start.bat`**，访问 `http://127.0.0.1:8080`，并做一次 `data/` 备份/删除验证。
-7. **附带说明**：`README.txt` 已含端口与外置 **`config/application.properties`** 说明。
+6. **验证**：解压 `BillInBill` → **双击 `run.bat` 或 `start.bat`** → `http://127.0.0.1:8080`。
+7. **说明**：极少数情况下换端口：`BillInBill\config\application.properties` 即可。
 
 ---
 
 ## 7. 验收标准（ZIP 交付物）
 
 - **单个 zip** 解压到本机任意**可写路径**（按 README 建议）后，**无需运行安装向导**即可使用；
-- 双击 **`start.bat`**（或等价启动器）后，控制台无致命错误且可在浏览器打开约定地址；
-- **数据**落在解压目录下的 `data\`（或文档约定的绝对路径），用户可只靠复制该目录完成备份；
+- 双击 **`run.bat`** 或 **`start.bat`**；
+- **DB 已与压缩包同在** **`data\wechat-bill.db`**，开箱运行；
 - **无需单独安装 JDK**（若压缩包内含 Java 21 运行时）；若采用精简包策略，须在 README 中明确依赖本机 JDK 21；
-- `8080` 被占用时有可见提示或文档说明如何通过 `config\application.properties` 改端口。
+- `8080` 被占用时，用户可自行在 **`BillInBill\config\application.properties`** 写 **`server.port=…`**（无需 BAT 与环境变量）。
 
 ---
 
@@ -216,12 +218,15 @@ powershell -ExecutionPolicy Bypass -File .\packaging\build-portable.ps1 -KeepSta
 ```text
 BillInBill/
   README.txt
+  run.bat
   start.bat
   lib/
-    bill-in-bill-backend.jar          # Fat JAR 固定命名，便于脚本与说明
-  jdk-21/                    # Windows x64 便携 JDK，或改名为 jre
-  data/                      # 可为空；SQLite 写入此目录（与相对 JDBC 对齐时）
-  config/                    # 可选 application.properties 覆盖端口/数据库路径
+    bill-in-bill-backend.jar          # Fat JAR（固定命名）
+  data/
+    wechat-bill.db                    # 已随包；开发机若存在 repo data/ 则优先打包该文件
+  config/
+    .keep                             # 仅占位；可添加 application.properties
+  jdk-21/                             # 可选便携 JDK（-JdkPath）
 ```
 
 `start.bat` 要点：**先切换工作目录至脚本所在目录**，再调用 Java；否则 `./data/wechat-bill.db` 会落到「当前双击时的目录」，导致找不到库或多份库。
